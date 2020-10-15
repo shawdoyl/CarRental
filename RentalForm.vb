@@ -1,28 +1,32 @@
-﻿Option Explicit On
+﻿'Shaw_Doyle
+'RCET0265
+'Fall 2020
+'Car_Rental_Form
+'https://github.com/shawdoyl/CarRental.git
+
+Option Explicit On
 Option Strict On
 Option Compare Binary
 Public Class RentalForm
     Dim numCustomers As Integer
-    Dim totalMiles As Decimal
-    Dim totalCharges As Decimal
-    Dim totalDiscount As Decimal = 0
-    Dim mileCharge As Decimal
+    Dim totalMiles, totalCharges, totalDiscount, mileCharge As Decimal
 
     Private Sub RentalForm_Load(sender As Object, e As EventArgs) Handles Me.Load
         ResetAll()
         SummaryButton.Enabled = False
-        NameTextBox.Text = "Doyle Shaw"
-        AddressTextBox.Text = "2720 E 95th N"
-        CityTextBox.Text = "Idaho Falls"
-        StateTextBox.Text = "Idaho"
-        ZipCodeTextBox.Text = "83401"
-        BeginOdometerTextBox.Text = "123456"
-        EndOdometerTextBox.Text = "123689"
-        DaysTextBox.Text = "15"
+        'Preset inputs for testing
+        'NameTextBox.Text = "Doyle Shaw"
+        'AddressTextBox.Text = "2720 E 95th N"
+        'CityTextBox.Text = "Idaho Falls"
+        'StateTextBox.Text = "Idaho"
+        'ZipCodeTextBox.Text = "83401"
+        'BeginOdometerTextBox.Text = "123456"
+        'EndOdometerTextBox.Text = "123689"
+        'DaysTextBox.Text = "15"
     End Sub
-
     Sub ResetAll()
-        'Clear User input
+        'Clear User input and output
+        'Inputs
         NameTextBox.Text = ""
         AddressTextBox.Text = ""
         CityTextBox.Text = ""
@@ -34,13 +38,17 @@ Public Class RentalForm
         MilesradioButton.Select()
         AAAcheckbox.Checked = False
         Seniorcheckbox.Checked = False
-        'Clear Output
+        'Outputs
+        TotalMilesTextBox.Text = ""
+        MileageChargeTextBox.Text = ""
+        DayChargeTextBox.Text = ""
+        TotalDiscountTextBox.Text = ""
+        TotalChargeTextBox.Text = ""
     End Sub
     Function MileageCharge(ByRef miles As Decimal) As Decimal
         'First 200 miles driven are always free. 
-        'All miles between 201 And 500 inclusive are .12 cents per mile. 
+        'All miles between 201 And 500 are .12 cents per mile. 
         'miles greater than 500 are charged at .10 cents per mile.
-
         Const RATEREGULAR = 0.12D
         Const RATELOW = 0.1D
         Const RATEFREE = 0D
@@ -54,37 +62,40 @@ Public Class RentalForm
             Case Else
                 mileCharge = (miles - 200) * RATEREGULAR
         End Select
-
         Return mileCharge
     End Function
     Function Discount(totalCharges As Decimal) As Decimal
-        'Use the check boxes for AAA Member And Senior Citizen. 
         'AAA members receive a 5% discount
         'senior citizens get a 3% discount.
-        'A person can receive both discounts. 
-        'Do Not take the discount until the calculate button Is clicked.
         Const AAARATE = 0.05D
         Const SENIORRATE = 0.03D
 
         If AAAcheckbox.Checked = True Then
             totalDiscount += totalCharges * AAARATE
         End If
-
         If Seniorcheckbox.Checked = True Then
             totalDiscount += totalCharges * SENIORRATE
         End If
-
         Return totalDiscount
+    End Function
+    Function UserMessages(addMessage As Boolean, message As String, clearMessage As Boolean) As String
+        Static formattedMessages As String
+
+        If clearMessage = True Then
+            formattedMessages = ""
+        ElseIf addMessage = True Then
+            formattedMessages &= message & vbNewLine
+        End If
+        Return formattedMessages
     End Function
     Private Sub CalculateButton_Click(sender As Object, e As EventArgs) Handles CalculateButton.Click
         Dim dataValidated As Boolean = False
-        Dim userMessage As String = ""
-        Dim beginOdometer As Decimal
-        Dim endOdometer As Decimal
-        Dim numberOfDays As Integer
         Dim beginOdometerGood As Boolean = False
         Dim endOdometerGood As Boolean = False
         Dim daysNumberGood As Boolean = False
+        Dim beginOdometer, endOdometer As Decimal
+        Dim numberOfDays As Integer
+        Dim userMessage As String = ""
 
         If NameTextBox.Text = "" Then
             userMessage = "Please enter a Name." & vbNewLine
@@ -110,7 +121,6 @@ Public Class RentalForm
         If DaysTextBox.Text = "" Then
             userMessage &= "Please enter the number of days." & vbNewLine
         End If
-
         'if any of the last 3 are not blank, check to see if they are valid integers
         If BeginOdometerTextBox.Text <> "" Or EndOdometerTextBox.Text <> "" Or
             DaysTextBox.Text <> "" Then
@@ -151,7 +161,6 @@ Public Class RentalForm
                     & vbNewLine
             End Try
         End If
-
         If userMessage <> "" Then
             MsgBox(userMessage)
             'following 3 ifs clears bad data
@@ -164,7 +173,6 @@ Public Class RentalForm
             If daysNumberGood = False Then
                 DaysTextBox.Text = ""
             End If
-
             'Following ifs determines which bad data to select (last instance is selected)
             'if statements for each text box, from name to days. 
             'If bad, Then NameTextBox.Select()
@@ -197,40 +205,28 @@ Public Class RentalForm
         Else
             dataValidated = True
         End If
-
         If dataValidated = True Then
             'validation checks out. do math here
-            Dim milesDriven As Decimal
-            Dim milesDrivenRounded As Decimal
+            Dim milesDriven, milesDrivenRounded, totalOwed, subTotal As Decimal
             Dim dayCharge As Integer
-            Dim totalOwed As Decimal
 
             If MilesradioButton.Checked = True Then
                 milesDriven = endOdometer - beginOdometer
             Else
                 milesDriven = (endOdometer - beginOdometer) * 0.62D
             End If
-
             milesDrivenRounded = Math.Round(milesDriven, 2)
-
             MileageCharge(milesDrivenRounded)
-
             'daily charge =  days * $15
             dayCharge = numberOfDays * 15
             DayChargeTextBox.Text = dayCharge.ToString("C")
-
-            Dim subTotal As Decimal
             subTotal = mileCharge + dayCharge
-
-
             TotalMilesTextBox.Text = CStr(milesDrivenRounded)
             MileageChargeTextBox.Text = CStr(mileCharge)
             Discount(subTotal)
             TotalDiscountTextBox.Text = totalDiscount.ToString("c")
-
             totalOwed = mileCharge + dayCharge - totalDiscount
             TotalChargeTextBox.Text = totalOwed.ToString("c")
-
             'Add to the number of customers, and total charges and miles
             numCustomers += 1
             totalMiles += milesDriven
@@ -238,27 +234,13 @@ Public Class RentalForm
             SummaryButton.Enabled = True
         End If
     End Sub
-
     Private Sub SummaryButton_Click(sender As Object, e As EventArgs) Handles SummaryButton.Click
-        'show summary
         Dim totalSummary As String = ""
         totalSummary = "Total Customers:       " & numCustomers.ToString & vbNewLine
         totalSummary &= "Total Miles Driven:    " & totalMiles.ToString("n") & " mi" & vbNewLine
         totalSummary &= "Total charges:           " & totalCharges.ToString("c") & vbNewLine
         MessageBox.Show(totalSummary, "Detailed Summary")
     End Sub
-
-    Function UserMessages(addMessage As Boolean, message As String, clearMessage As Boolean) As String
-        Static formattedMessages As String
-
-        If clearMessage = True Then
-            formattedMessages = ""
-        ElseIf addMessage = True Then
-            formattedMessages &= message & vbNewLine
-        End If
-
-        Return formattedMessages
-    End Function
     Private Sub ClearButton_Click(sender As Object, e As EventArgs) Handles ClearButton.Click
         ResetAll()
         MileageChargeTextBox.Clear()
@@ -268,7 +250,31 @@ Public Class RentalForm
         TotalChargeTextBox.Clear()
     End Sub
     Private Sub ExitButton_Click(sender As Object, e As EventArgs) Handles ExitButton.Click
-        Me.Close()
-    End Sub
+        Dim Msg, Title As String
+        Dim Style As MsgBoxStyle
+        Dim Response As Integer
 
+        Msg = "Do you want to close the program?"
+        Title = "Close Program?"
+        Style = CType(vbYesNo + vbCritical + vbDefaultButton2, MsgBoxStyle)
+        Response = MsgBox(Msg, Style, Title)
+        If Response = vbYes Then
+            Msg = "Are you sure you want to close the program?"
+            Title = "Are You Sure?"
+            Style = CType(vbYesNo + vbCritical + vbDefaultButton2, MsgBoxStyle)
+            Response = MsgBox(Msg, Style, Title)
+            If Response = vbYes Then
+                Msg = "Are you really sure you want to close the program?"
+                Title = "Are You Really Sure?"
+                Style = CType(vbYesNo + vbCritical + vbDefaultButton2, MsgBoxStyle)
+                Response = MsgBox(Msg, Style, Title)
+                If Response = vbYes Then
+                    Me.Close()
+                Else
+                End If
+            Else
+            End If
+        Else
+        End If
+    End Sub
 End Class
