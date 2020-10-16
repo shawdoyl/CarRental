@@ -277,4 +277,11 @@ Public Class RentalForm
         Else
         End If
     End Sub
+    Private Sub AboutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AboutToolStripMenuItem.Click
+        MsgBox("Car Rental program Beta Version 1.0.001" & vbNewLine _
+               & "Doyle Shaw" & vbNewLine _
+               & "Fall 2020" & vbNewLine _
+               & "RCET0265" & vbNewLine _
+               & "In association with Doofenshmirtz Evil Incorporated.")
+    End Sub
 End Class
