@@ -15,14 +15,14 @@ Public Class RentalForm
         ResetAll()
         SummaryButton.Enabled = False
         'Preset inputs for testing
-        'NameTextBox.Text = "Doyle Shaw"
-        'AddressTextBox.Text = "2720 E 95th N"
-        'CityTextBox.Text = "Idaho Falls"
-        'StateTextBox.Text = "Idaho"
-        'ZipCodeTextBox.Text = "83401"
-        'BeginOdometerTextBox.Text = "123456"
-        'EndOdometerTextBox.Text = "123689"
-        'DaysTextBox.Text = "15"
+        NameTextBox.Text = "Doyle Shaw"
+        AddressTextBox.Text = "2720 E 95th N"
+        CityTextBox.Text = "Idaho Falls"
+        StateTextBox.Text = "Idaho"
+        ZipCodeTextBox.Text = "83401"
+        BeginOdometerTextBox.Text = "123456"
+        EndOdometerTextBox.Text = "123689"
+        DaysTextBox.Text = "15"
     End Sub
     Sub ResetAll()
         'Clear User input and output
@@ -71,10 +71,10 @@ Public Class RentalForm
         Const SENIORRATE = 0.03D
 
         If AAAcheckbox.Checked = True Then
-            totalDiscount += totalCharges * AAARATE
+            totalDiscount = totalCharges * AAARATE
         End If
         If Seniorcheckbox.Checked = True Then
-            totalDiscount += totalCharges * SENIORRATE
+            totalDiscount = totalCharges * SENIORRATE
         End If
         Return totalDiscount
     End Function
@@ -88,7 +88,7 @@ Public Class RentalForm
         End If
         Return formattedMessages
     End Function
-    Private Sub CalculateButton_Click(sender As Object, e As EventArgs) Handles CalculateButton.Click
+    Private Sub CalculateButton_Click(sender As Object, e As EventArgs) Handles CalculateButton.Click, CalculateToolStripMenuItem.Click
         Dim dataValidated As Boolean = False
         Dim beginOdometerGood As Boolean = False
         Dim endOdometerGood As Boolean = False
@@ -221,7 +221,11 @@ Public Class RentalForm
             dayCharge = numberOfDays * 15
             DayChargeTextBox.Text = dayCharge.ToString("C")
             subTotal = mileCharge + dayCharge
-            TotalMilesTextBox.Text = CStr(milesDrivenRounded)
+            If MilesradioButton.Checked = True Then
+                TotalMilesTextBox.Text = CStr(milesDrivenRounded) & "mi"
+            Else
+                TotalMilesTextBox.Text = CStr(milesDrivenRounded) & "Km"
+            End If
             MileageChargeTextBox.Text = CStr(mileCharge)
             Discount(subTotal)
             TotalDiscountTextBox.Text = totalDiscount.ToString("c")
@@ -234,14 +238,14 @@ Public Class RentalForm
             SummaryButton.Enabled = True
         End If
     End Sub
-    Private Sub SummaryButton_Click(sender As Object, e As EventArgs) Handles SummaryButton.Click
+    Private Sub SummaryButton_Click(sender As Object, e As EventArgs) Handles SummaryButton.Click, SummaryToolStripMenuItem.Click, SummaryToolStripMenuItem1.Click
         Dim totalSummary As String = ""
         totalSummary = "Total Customers:       " & numCustomers.ToString & vbNewLine
         totalSummary &= "Total Miles Driven:    " & totalMiles.ToString("n") & " mi" & vbNewLine
         totalSummary &= "Total charges:           " & totalCharges.ToString("c") & vbNewLine
         MessageBox.Show(totalSummary, "Detailed Summary")
     End Sub
-    Private Sub ClearButton_Click(sender As Object, e As EventArgs) Handles ClearButton.Click
+    Private Sub ClearButton_Click(sender As Object, e As EventArgs) Handles ClearButton.Click, ClearToolStripMenuItem.Click, ClearToolStripMenuItem1.Click
         ResetAll()
         MileageChargeTextBox.Clear()
         TotalMilesTextBox.Clear()
@@ -249,7 +253,7 @@ Public Class RentalForm
         TotalDiscountTextBox.Clear()
         TotalChargeTextBox.Clear()
     End Sub
-    Private Sub ExitButton_Click(sender As Object, e As EventArgs) Handles ExitButton.Click
+    Private Sub ExitButton_Click(sender As Object, e As EventArgs) Handles ExitButton.Click, ExitToolStripMenuItem.Click, ExitToolStripMenuItem1.Click
         Dim Msg, Title As String
         Dim Style As MsgBoxStyle
         Dim Response As Integer
